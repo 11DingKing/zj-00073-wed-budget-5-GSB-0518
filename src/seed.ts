@@ -13,6 +13,8 @@ import { BudgetTemplate } from "./entities/BudgetTemplate";
 import { AlertRule } from "./entities/AlertRule";
 import { Alert } from "./entities/Alert";
 import { SharedAccess } from "./entities/SharedAccess";
+import { Vendor } from "./entities/Vendor";
+import { VendorQuote } from "./entities/VendorQuote";
 import crypto from "crypto";
 
 async function seed() {
@@ -33,6 +35,8 @@ async function seed() {
   const alertRuleRepository = AppDataSource.getRepository(AlertRule);
   const alertRepository = AppDataSource.getRepository(Alert);
   const sharedAccessRepository = AppDataSource.getRepository(SharedAccess);
+  const vendorRepository = AppDataSource.getRepository(Vendor);
+  const quoteRepository = AppDataSource.getRepository(VendorQuote);
 
   console.log("1. 创建用户账号...");
   const hashedAdminPassword = crypto
@@ -559,6 +563,174 @@ async function seed() {
   });
   await sharedAccessRepository.save(sharedAccess);
 
+  console.log("15. 创建 6 个供应商...");
+  const vendorsData = [
+    {
+      name: "星光婚礼策划",
+      categoryId: 1,
+      contactPhone: "13800000001",
+      wechat: "starlight_wedding",
+      rating: 5,
+      notes: "老牌婚庆公司，服务周到",
+    },
+    {
+      name: "玫瑰花园花艺",
+      categoryId: 9,
+      contactPhone: "13800000002",
+      wechat: "rose_flower_shop",
+      rating: 4,
+      notes: "精品花艺工作室",
+    },
+    {
+      name: "光影摄影工作室",
+      categoryId: 2,
+      contactPhone: "13800000003",
+      wechat: "light_photo_studio",
+      rating: 5,
+      notes: "专业婚礼摄影团队",
+    },
+    {
+      name: "金钻婚纱礼服",
+      categoryId: 3,
+      contactPhone: "13800000004",
+      wechat: "diamond_dress",
+      rating: 4,
+      notes: "高端婚纱定制店",
+    },
+    {
+      name: "五星酒店婚宴",
+      categoryId: 11,
+      contactPhone: "13800000005",
+      wechat: "fivestar_hotel",
+      rating: 5,
+      notes: "五星级酒店婚宴服务",
+    },
+    {
+      name: "甜蜜喜糖铺",
+      categoryId: 5,
+      contactPhone: "13800000006",
+      wechat: "sweet_candy",
+      rating: 4,
+      notes: "喜糖与伴手礼定制",
+    },
+  ];
+
+  const vendors: Vendor[] = [];
+  for (const vData of vendorsData) {
+    const { categoryId, ...rest } = vData;
+    const vendor = vendorRepository.create(rest);
+    const cat = await categoryRepository.findOneBy({ id: categoryId });
+    if (cat) {
+      (vendor as any).category = cat;
+    }
+    vendors.push(await vendorRepository.save(vendor));
+  }
+
+  console.log("16. 创建 12 条供应商报价...");
+  const quoteExpiresAt = new Date();
+  quoteExpiresAt.setMonth(quoteExpiresAt.getMonth() + 3);
+
+  const quotesData = [
+    {
+      vendorIndex: 0,
+      itemIndex: 0,
+      quotedPrice: 9500,
+      currency: "CNY",
+      status: "accepted" as any,
+    },
+    {
+      vendorIndex: 0,
+      itemIndex: 1,
+      quotedPrice: 38000,
+      currency: "CNY",
+      status: "pending" as any,
+    },
+    {
+      vendorIndex: 2,
+      itemIndex: 4,
+      quotedPrice: 7800,
+      currency: "CNY",
+      status: "accepted" as any,
+    },
+    {
+      vendorIndex: 2,
+      itemIndex: 5,
+      quotedPrice: 6500,
+      currency: "CNY",
+      status: "pending" as any,
+    },
+    {
+      vendorIndex: 3,
+      itemIndex: 6,
+      quotedPrice: 11500,
+      currency: "CNY",
+      status: "accepted" as any,
+    },
+    {
+      vendorIndex: 3,
+      itemIndex: 7,
+      quotedPrice: 7800,
+      currency: "CNY",
+      status: "rejected" as any,
+    },
+    {
+      vendorIndex: 4,
+      itemIndex: 8,
+      quotedPrice: 2800,
+      currency: "CNY",
+      status: "pending" as any,
+    },
+    {
+      vendorIndex: 4,
+      itemIndex: 9,
+      quotedPrice: 18000,
+      currency: "CNY",
+      status: "pending" as any,
+    },
+    {
+      vendorIndex: 1,
+      itemIndex: 2,
+      quotedPrice: 14500,
+      currency: "CNY",
+      status: "pending" as any,
+    },
+    {
+      vendorIndex: 1,
+      itemIndex: 3,
+      quotedPrice: 7500,
+      currency: "CNY",
+      status: "accepted" as any,
+    },
+    {
+      vendorIndex: 5,
+      itemIndex: 0,
+      quotedPrice: 9800,
+      currency: "CNY",
+      status: "pending" as any,
+    },
+    {
+      vendorIndex: 0,
+      itemIndex: 2,
+      quotedPrice: 14800,
+      currency: "CNY",
+      status: "rejected" as any,
+    },
+  ];
+
+  for (const qData of quotesData) {
+    const item = await itemRepository.findOneBy({ id: qData.itemIndex + 1 });
+    const quote = quoteRepository.create({
+      vendor: vendors[qData.vendorIndex],
+      budgetItem: item!,
+      quotedPrice: qData.quotedPrice,
+      currency: qData.currency as any,
+      quotedAt: today,
+      expiresAt: quoteExpiresAt,
+      status: qData.status,
+    });
+    await quoteRepository.save(quote);
+  }
+
   console.log("\n✅ 数据初始化完成!");
   console.log("\n📝 账号信息:");
   console.log("   - 管理员: admin / admin123456");
@@ -584,6 +756,8 @@ async function seed() {
   console.log(
     `   - 共享链接: ${(await sharedAccessRepository.find()).length} 个`,
   );
+  console.log(`   - 供应商: ${vendors.length} 个`);
+  console.log(`   - 供应商报价: ${(await quoteRepository.find()).length} 条`);
   console.log("\n🚀 启动服务: npm run dev");
   console.log("📚 Swagger 文档: http://localhost:3000/api/docs");
 
