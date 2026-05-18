@@ -188,6 +188,7 @@ export async function vendorRoutes(
         order: { quotedPrice: "ASC" },
       });
 
+      const now = new Date();
       const compareList = quotes.map((q) => ({
         quoteId: q.id,
         vendorId: q.vendorId,
@@ -198,6 +199,7 @@ export async function vendorRoutes(
         quotedAt: q.quotedAt,
         expiresAt: q.expiresAt,
         status: q.status,
+        expired: q.expiresAt ? new Date(q.expiresAt) < now : false,
       }));
 
       return {
