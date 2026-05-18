@@ -1,0 +1,33 @@
+{
+  "name": "wedding-budget-service",
+  "version": "1.0.0",
+  "description": "Wedding budget and bill management service",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "seed": "tsx src/seed.ts",
+    "typeorm": "typeorm-ts-node-commonjs"
+  },
+  "dependencies": {
+    "@fastify/jwt": "^8.0.0",
+    "@fastify/swagger": "^8.14.0",
+    "@fastify/swagger-ui": "^3.0.0",
+    "sqlite3": "^5.1.7",
+    "csv-parser": "^3.0.0",
+    "fastify": "^4.26.2",
+    "json2csv": "^6.0.0-alpha.2",
+    "reflect-metadata": "^0.2.1",
+    "typeorm": "^0.3.20"
+  },
+  "devDependencies": {
+    "@types/json2csv": "^5.0.7",
+    "@types/node": "^20.11.30",
+    "tsx": "^4.7.1",
+    "typescript": "^5.4.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
