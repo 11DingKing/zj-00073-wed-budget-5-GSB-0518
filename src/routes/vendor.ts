@@ -365,6 +365,7 @@ export async function vendorRoutes(
         relations: ["vendor", "budgetItem"],
         order: { quotedPrice: "ASC" },
       });
+      const now = new Date();
       return {
         budgetItem,
         quotes: quotes.map((q: any) => ({
@@ -376,6 +377,7 @@ export async function vendorRoutes(
           quotedAt: q.quotedAt,
           expiresAt: q.expiresAt,
           status: q.status,
+          expired: !!(q.expiresAt && new Date(q.expiresAt) < now),
         })),
       };
     }
