@@ -13,6 +13,8 @@ import { BudgetTemplate } from "./entities/BudgetTemplate";
 import { AlertRule } from "./entities/AlertRule";
 import { Alert } from "./entities/Alert";
 import { SharedAccess } from "./entities/SharedAccess";
+import { Vendor } from "./entities/Vendor";
+import { VendorQuote } from "./entities/VendorQuote";
 import crypto from "crypto";
 
 async function seed() {
@@ -33,6 +35,8 @@ async function seed() {
   const alertRuleRepository = AppDataSource.getRepository(AlertRule);
   const alertRepository = AppDataSource.getRepository(Alert);
   const sharedAccessRepository = AppDataSource.getRepository(SharedAccess);
+  const vendorRepository = AppDataSource.getRepository(Vendor);
+  const vendorQuoteRepository = AppDataSource.getRepository(VendorQuote);
 
   console.log("1. 创建用户账号...");
   const hashedAdminPassword = crypto
@@ -178,28 +182,40 @@ async function seed() {
   }
 
   console.log("5. 创建 3 个分期合同...");
-  const today = new Date();
+  const quoteToday = new Date();
   const installmentContracts = [
     {
       supplierName: "BB酒店",
       totalAmount: 150000,
       installmentCount: 3,
       perInstallmentAmount: 50000,
-      firstDueDate: new Date(today.getFullYear(), today.getMonth(), 1),
+      firstDueDate: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth(),
+        1,
+      ),
     },
     {
       supplierName: "XX婚庆公司",
       totalAmount: 80000,
       installmentCount: 2,
       perInstallmentAmount: 40000,
-      firstDueDate: new Date(today.getFullYear(), today.getMonth() + 1, 15),
+      firstDueDate: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth() + 1,
+        15,
+      ),
     },
     {
       supplierName: "YY摄影工作室",
       totalAmount: 20000,
       installmentCount: 2,
       perInstallmentAmount: 10000,
-      firstDueDate: new Date(today.getFullYear(), today.getMonth() - 1, 10),
+      firstDueDate: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth() - 1,
+        10,
+      ),
     },
   ];
 
@@ -214,7 +230,7 @@ async function seed() {
         perInstallmentAmount: contract.perInstallmentAmount,
         installmentNumber: i + 1,
         dueDate,
-        status: i === 0 ? "已付" : dueDate < today ? "逾期" : "待付",
+        status: i === 0 ? "已付" : dueDate < quoteToday ? "逾期" : "待付",
       });
       await installmentRepository.save(installment);
     }
@@ -559,6 +575,279 @@ async function seed() {
   });
   await sharedAccessRepository.save(sharedAccess);
 
+  console.log("15. 创建 6 个供应商...");
+  const vendorsData = [
+    {
+      name: "XX婚庆策划公司",
+      category: "婚庆布置",
+      contactPhone: "13800138001",
+      wechat: "xxwedding",
+      rating: 4.5,
+      notes: "专业婚礼策划，口碑良好",
+    },
+    {
+      name: "YY摄影工作室",
+      category: "摄影摄像",
+      contactPhone: "13800138002",
+      wechat: "yyphoto",
+      rating: 4.8,
+      notes: "资深摄影师，风格独特",
+    },
+    {
+      name: "ZZ婚纱礼服馆",
+      category: "婚纱礼服",
+      contactPhone: "13800138003",
+      wechat: "zzdress",
+      rating: 4.2,
+      notes: "品牌婚纱，款式多样",
+    },
+    {
+      name: "AA花艺设计",
+      category: "花艺",
+      contactPhone: "13800138004",
+      wechat: "aflower",
+      rating: 4.6,
+      notes: "进口花材，设计新颖",
+    },
+    {
+      name: "BB豪华酒店",
+      category: "场地租赁",
+      contactPhone: "13800138005",
+      wechat: "bbhotel",
+      rating: 4.9,
+      notes: "五星级酒店，场地宽敞",
+    },
+    {
+      name: "CC灯光音响",
+      category: "灯光音响",
+      contactPhone: "13800138006",
+      wechat: "ccaudio",
+      rating: 4.3,
+      notes: "专业设备，技术过硬",
+    },
+  ];
+
+  const vendors: Vendor[] = [];
+  for (const vData of vendorsData) {
+    const vendor = vendorRepository.create(vData);
+    vendors.push(await vendorRepository.save(vendor));
+  }
+
+  console.log("16. 创建 12 条供应商报价...");
+  const budgetItems = await itemRepository.find();
+
+  const quotesData = [
+    {
+      vendor: vendors[0],
+      budgetItem: budgetItems[2],
+      quotedPrice: 12000,
+      quotedAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth(),
+        quoteToday.getDate() - 5,
+      ),
+      expiresAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth() + 1,
+        quoteToday.getDate(),
+      ),
+      status: "pending" as any,
+      notes: "含主舞台背景、T台布置",
+    },
+    {
+      vendor: vendors[0],
+      budgetItem: budgetItems[3],
+      quotedPrice: 6000,
+      quotedAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth(),
+        quoteToday.getDate() - 5,
+      ),
+      expiresAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth() + 1,
+        quoteToday.getDate(),
+      ),
+      status: "accepted" as any,
+      notes: "迎宾区花艺装饰",
+    },
+    {
+      vendor: vendors[1],
+      budgetItem: budgetItems[4],
+      quotedPrice: 9800,
+      quotedAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth(),
+        quoteToday.getDate() - 10,
+      ),
+      expiresAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth() + 2,
+        quoteToday.getDate(),
+      ),
+      status: "pending" as any,
+      notes: "5套服装，300张精修",
+    },
+    {
+      vendor: vendors[1],
+      budgetItem: budgetItems[5],
+      quotedPrice: 6800,
+      quotedAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth(),
+        quoteToday.getDate() - 8,
+      ),
+      expiresAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth() + 2,
+        quoteToday.getDate(),
+      ),
+      status: "pending" as any,
+      notes: "双机位跟拍8小时",
+    },
+    {
+      vendor: vendors[2],
+      budgetItem: budgetItems[6],
+      quotedPrice: 15000,
+      quotedAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth(),
+        quoteToday.getDate() - 3,
+      ),
+      expiresAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth() + 3,
+        quoteToday.getDate(),
+      ),
+      status: "rejected" as any,
+      notes: "拖尾婚纱+敬酒服+出门纱",
+    },
+    {
+      vendor: vendors[2],
+      budgetItem: budgetItems[7],
+      quotedPrice: 7500,
+      quotedAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth(),
+        quoteToday.getDate() - 3,
+      ),
+      expiresAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth() + 3,
+        quoteToday.getDate(),
+      ),
+      status: "pending" as any,
+      notes: "定制西装2件套",
+    },
+    {
+      vendor: vendors[3],
+      budgetItem: budgetItems[2],
+      quotedPrice: 13500,
+      quotedAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth(),
+        quoteToday.getDate() - 2,
+      ),
+      expiresAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth() + 1,
+        quoteToday.getDate(),
+      ),
+      status: "pending" as any,
+      notes: "全鲜花布置，含进口玫瑰",
+    },
+    {
+      vendor: vendors[3],
+      budgetItem: budgetItems[3],
+      quotedPrice: 5500,
+      quotedAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth(),
+        quoteToday.getDate() - 2,
+      ),
+      expiresAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth() + 1,
+        quoteToday.getDate(),
+      ),
+      status: "pending" as any,
+      notes: "迎宾区花艺+签到台装饰",
+    },
+    {
+      vendor: vendors[4],
+      budgetItem: budgetItems[0],
+      quotedPrice: 8000,
+      quotedAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth(),
+        quoteToday.getDate() - 15,
+      ),
+      expiresAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth(),
+        quoteToday.getDate() + 15,
+      ),
+      status: "accepted" as any,
+      notes: "场地定金，可退",
+    },
+    {
+      vendor: vendors[4],
+      budgetItem: budgetItems[1],
+      quotedPrice: 42000,
+      quotedAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth(),
+        quoteToday.getDate() - 15,
+      ),
+      expiresAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth(),
+        quoteToday.getDate() + 15,
+      ),
+      status: "pending" as any,
+      notes: "场地尾款，婚礼前一周支付",
+    },
+    {
+      vendor: vendors[5],
+      budgetItem: budgetItems[2],
+      quotedPrice: 11000,
+      quotedAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth(),
+        quoteToday.getDate() - 7,
+      ),
+      expiresAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth() + 1,
+        quoteToday.getDate(),
+      ),
+      status: "pending" as any,
+      notes: "舞台灯光+音响设备一套",
+    },
+    {
+      vendor: vendors[1],
+      budgetItem: budgetItems[4],
+      quotedPrice: 7500,
+      quotedAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth(),
+        quoteToday.getDate() - 12,
+      ),
+      expiresAt: new Date(
+        quoteToday.getFullYear(),
+        quoteToday.getMonth() + 2,
+        quoteToday.getDate(),
+      ),
+      status: "pending" as any,
+      notes: "3套服装，200张精修，经济型套餐",
+    },
+  ];
+
+  for (const qData of quotesData) {
+    const quote = vendorQuoteRepository.create(qData);
+    await vendorQuoteRepository.save(quote);
+  }
+
   console.log("\n✅ 数据初始化完成!");
   console.log("\n📝 账号信息:");
   console.log("   - 管理员: admin / admin123456");
@@ -583,6 +872,10 @@ async function seed() {
   console.log(`   - 预警记录: ${(await alertRepository.find()).length} 条`);
   console.log(
     `   - 共享链接: ${(await sharedAccessRepository.find()).length} 个`,
+  );
+  console.log(`   - 供应商: ${(await vendorRepository.find()).length} 个`);
+  console.log(
+    `   - 供应商报价: ${(await vendorQuoteRepository.find()).length} 条`,
   );
   console.log("\n🚀 启动服务: npm run dev");
   console.log("📚 Swagger 文档: http://localhost:3000/api/docs");
