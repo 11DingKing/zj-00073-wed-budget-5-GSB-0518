@@ -16,6 +16,7 @@ import { exchangeRateRoutes } from "./routes/exchange-rate";
 import { budgetTemplateRoutes } from "./routes/budget-template";
 import { alertRoutes } from "./routes/alert";
 import { sharedAccessRoutes } from "./routes/shared-access";
+import { vendorRoutes } from "./routes/vendor";
 
 export async function buildApp() {
   const app = fastify({ logger: true });
@@ -93,6 +94,7 @@ export async function buildApp() {
   await app.register(budgetTemplateRoutes, { prefix: "/api/budget-template" });
   await app.register(alertRoutes, { prefix: "/api/alert" });
   await app.register(sharedAccessRoutes, { prefix: "/api/shared-access" });
+  await app.register(vendorRoutes, { prefix: "/api/vendors" });
 
   app.get("/health", async () => {
     return { status: "ok", message: "婚礼预算与账单管理服务运行正常" };
