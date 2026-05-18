@@ -13,6 +13,8 @@ import { BudgetTemplate } from "./entities/BudgetTemplate";
 import { AlertRule } from "./entities/AlertRule";
 import { Alert } from "./entities/Alert";
 import { SharedAccess } from "./entities/SharedAccess";
+import { Vendor } from "./entities/Vendor";
+import { VendorQuote } from "./entities/VendorQuote";
 import crypto from "crypto";
 
 async function seed() {
@@ -33,6 +35,8 @@ async function seed() {
   const alertRuleRepository = AppDataSource.getRepository(AlertRule);
   const alertRepository = AppDataSource.getRepository(Alert);
   const sharedAccessRepository = AppDataSource.getRepository(SharedAccess);
+  const vendorRepository = AppDataSource.getRepository(Vendor);
+  const vendorQuoteRepository = AppDataSource.getRepository(VendorQuote);
 
   console.log("1. 创建用户账号...");
   const hashedAdminPassword = crypto
@@ -559,6 +563,157 @@ async function seed() {
   });
   await sharedAccessRepository.save(sharedAccess);
 
+  console.log("15. 创建 5 个供应商...");
+  const savedItems = await itemRepository.find();
+  const vendorsData = [
+    {
+      name: "花嫁婚庆策划",
+      category: "婚庆布置" as any,
+      contactPhone: "138-0000-1111",
+      wechat: "huajia_wedding",
+      rating: 5,
+      notes: "十年经验，服务口碑极好",
+    },
+    {
+      name: "光影摄影工作室",
+      category: "摄影摄像" as any,
+      contactPhone: "139-0000-2222",
+      wechat: "guangying_photo",
+      rating: 4,
+      notes: "擅长纪实风格",
+    },
+    {
+      name: "锦华大酒店",
+      category: "婚宴酒席" as any,
+      contactPhone: "021-8888-6666",
+      wechat: "jinhua_hotel",
+      rating: 5,
+      notes: "五星级酒店，含场地布置",
+    },
+    {
+      name: "悦美花艺",
+      category: "花艺" as any,
+      contactPhone: "137-0000-3333",
+      wechat: "yuemei_flower",
+      rating: 4,
+      notes: "专注婚礼花艺设计",
+    },
+    {
+      name: "璀璨灯光音响",
+      category: "灯光音响" as any,
+      contactPhone: "136-0000-4444",
+      wechat: "cuican_sound",
+      rating: 3,
+      notes: "性价比高，设备齐全",
+    },
+  ];
+
+  const vendors: Vendor[] = [];
+  for (const vData of vendorsData) {
+    const vendor = vendorRepository.create(vData);
+    vendors.push(await vendorRepository.save(vendor));
+  }
+
+  console.log("16. 创建 10 条供应商报价...");
+  const quoteNow = new Date();
+  const quotesData = [
+    {
+      vendorId: vendors[0].id,
+      budgetItemId: savedItems.find((i) => i.name === "主舞台布置")!.id,
+      quotedPrice: 12000,
+      currency: "CNY",
+      quotedAt: new Date(quoteNow.getTime() - 3 * 86400000),
+      expiresAt: new Date(quoteNow.getTime() + 30 * 86400000),
+      status: "pending" as any,
+    },
+    {
+      vendorId: vendors[0].id,
+      budgetItemId: savedItems.find((i) => i.name === "迎宾区布置")!.id,
+      quotedPrice: 6500,
+      currency: "CNY",
+      quotedAt: new Date(quoteNow.getTime() - 2 * 86400000),
+      expiresAt: new Date(quoteNow.getTime() + 30 * 86400000),
+      status: "accepted" as any,
+    },
+    {
+      vendorId: vendors[1].id,
+      budgetItemId: savedItems.find((i) => i.name === "婚纱照")!.id,
+      quotedPrice: 7500,
+      currency: "CNY",
+      quotedAt: new Date(quoteNow.getTime() - 5 * 86400000),
+      expiresAt: new Date(quoteNow.getTime() + 15 * 86400000),
+      status: "pending" as any,
+    },
+    {
+      vendorId: vendors[1].id,
+      budgetItemId: savedItems.find((i) => i.name === "婚礼跟拍")!.id,
+      quotedPrice: 5800,
+      currency: "CNY",
+      quotedAt: new Date(quoteNow.getTime() - 1 * 86400000),
+      expiresAt: new Date(quoteNow.getTime() + 20 * 86400000),
+      status: "rejected" as any,
+    },
+    {
+      vendorId: vendors[2].id,
+      budgetItemId: savedItems.find((i) => i.name === "每桌餐费")!.id,
+      quotedPrice: 2888,
+      currency: "CNY",
+      quotedAt: new Date(quoteNow.getTime() - 7 * 86400000),
+      expiresAt: new Date(quoteNow.getTime() + 60 * 86400000),
+      status: "pending" as any,
+    },
+    {
+      vendorId: vendors[2].id,
+      budgetItemId: savedItems.find((i) => i.name === "酒水饮料")!.id,
+      quotedPrice: 18000,
+      currency: "CNY",
+      quotedAt: new Date(quoteNow.getTime() - 4 * 86400000),
+      expiresAt: new Date(quoteNow.getTime() + 60 * 86400000),
+      status: "accepted" as any,
+    },
+    {
+      vendorId: vendors[3].id,
+      budgetItemId: savedItems.find((i) => i.name === "新娘婚纱")!.id,
+      quotedPrice: 9800,
+      currency: "CNY",
+      quotedAt: new Date(quoteNow.getTime() - 6 * 86400000),
+      expiresAt: new Date(quoteNow.getTime() + 10 * 86400000),
+      status: "pending" as any,
+    },
+    {
+      vendorId: vendors[3].id,
+      budgetItemId: savedItems.find((i) => i.name === "新郎西装")!.id,
+      quotedPrice: 6500,
+      currency: "CNY",
+      quotedAt: new Date(quoteNow.getTime() - 3 * 86400000),
+      expiresAt: new Date(quoteNow.getTime() + 10 * 86400000),
+      status: "pending" as any,
+    },
+    {
+      vendorId: vendors[4].id,
+      budgetItemId: savedItems.find((i) => i.name === "场地定金")!.id,
+      quotedPrice: 8500,
+      currency: "CNY",
+      quotedAt: new Date(quoteNow.getTime() - 10 * 86400000),
+      expiresAt: new Date(quoteNow.getTime() + 45 * 86400000),
+      status: "rejected" as any,
+    },
+    {
+      vendorId: vendors[4].id,
+      budgetItemId: savedItems.find((i) => i.name === "场地尾款")!.id,
+      quotedPrice: 35000,
+      currency: "CNY",
+      quotedAt: new Date(quoteNow.getTime() - 8 * 86400000),
+      expiresAt: new Date(quoteNow.getTime() + 45 * 86400000),
+      status: "pending" as any,
+    },
+  ];
+
+  for (const qData of quotesData) {
+    const quote = vendorQuoteRepository.create(qData);
+    await vendorQuoteRepository.save(quote);
+  }
+
   console.log("\n✅ 数据初始化完成!");
   console.log("\n📝 账号信息:");
   console.log("   - 管理员: admin / admin123456");
@@ -583,6 +738,10 @@ async function seed() {
   console.log(`   - 预警记录: ${(await alertRepository.find()).length} 条`);
   console.log(
     `   - 共享链接: ${(await sharedAccessRepository.find()).length} 个`,
+  );
+  console.log(`   - 供应商: ${(await vendorRepository.find()).length} 家`);
+  console.log(
+    `   - 供应商报价: ${(await vendorQuoteRepository.find()).length} 条`,
   );
   console.log("\n🚀 启动服务: npm run dev");
   console.log("📚 Swagger 文档: http://localhost:3000/api/docs");
