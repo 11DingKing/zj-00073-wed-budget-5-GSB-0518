@@ -368,6 +368,7 @@ export async function vendorRoutes(
         .orderBy("quote.quotedPrice", "ASC")
         .getMany();
 
+      const now = new Date();
       const comparisonList = quotes.map((quote, index) => ({
         rank: index + 1,
         quoteId: quote.id,
@@ -383,6 +384,7 @@ export async function vendorRoutes(
         expiresAt: quote.expiresAt,
         status: quote.status,
         notes: quote.notes,
+        expired: quote.expiresAt ? new Date(quote.expiresAt) < now : false,
         priceDifference: index === 0 ? 0 : quote.quotedPrice - quotes[0].quotedPrice,
       }));
 

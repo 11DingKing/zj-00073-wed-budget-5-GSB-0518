@@ -15,22 +15,22 @@ export class VendorQuote {
   @ManyToOne(() => BudgetItem, { onDelete: "CASCADE" })
   budgetItem!: BudgetItem;
 
-  @Column({ type: "real" })
+  @Column({ type: "real", comment: "报价金额" })
   quotedPrice!: number;
 
-  @Column({ type: "text", default: "CNY" })
+  @Column({ type: "text", default: "CNY", comment: "货币类型" })
   currency!: string;
 
-  @Column({ type: "datetime" })
+  @Column({ type: "datetime", comment: "报价日期" })
   quotedAt!: Date;
 
-  @Column({ type: "datetime", nullable: true })
+  @Column({ type: "datetime", nullable: true, comment: "报价有效期至" })
   expiresAt?: Date;
 
-  @Column({ type: "text", default: "pending" })
+  @Column({ type: "text", default: "pending", comment: "报价状态：pending/accepted/rejected" })
   status!: VendorQuoteStatus;
 
-  @Column({ type: "text", nullable: true })
+  @Column({ type: "text", nullable: true, comment: "备注" })
   notes?: string;
 
   @CreateDateColumn()
